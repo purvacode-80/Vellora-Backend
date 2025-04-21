@@ -27,6 +27,12 @@ app.get('/', (req,res) => {
 const user_route = require('./Routes/user_routes')
 app.use('/users', user_route)
 
+const contact_route = require('./Routes/contact_routes')
+app.use('/contact', contact_route)
+
+const lead_route = require('./Routes/lead_routes')
+app.use('/lead', lead_route)
+
 const port = 8000
 app.listen(port, ()=> {
     console.log(`Server running on port ${port}`);

@@ -1,4 +1,4 @@
-const User = require('../Modal/user_model')
+const User = require('../Model/user_model')
 const bcrypt = require('bcrypt')
 
 const jwt = require('jsonwebtoken')
@@ -51,8 +51,8 @@ const loginUser = async (req,res) => {
 
 const getUsers = async(req,res) => {
     try {
-        const User = await User.find()
-        res.status(200).json(User)
+        const users = await User.find()
+        res.status(200).json(users)
     } catch (err) {
         res.status(500).json({ message : "Internal Server Error" , error : err.message })
     }
