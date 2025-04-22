@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 // Connect to MongoDB
 
-mongoose.connect('mongodb+srv://purva_db_39:JjKd42aDdEhPKw7K@vellora-cluster.aruoylu.mongodb.net/Vellora', {
+mongoose.connect('mongodb+srv://dhanashreemore314:MlajhyMm5IfPwZWW@vellora-cluster.aruoylu.mongodb.net/Vellora', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -32,6 +32,9 @@ app.use('/contact', contact_route)
 
 const lead_route = require('./Routes/lead_routes')
 app.use('/lead', lead_route)
+
+const task_route = require('./Routes/task_routes')
+app.use('/task', task_route)
 
 const port = 8000
 app.listen(port, ()=> {
