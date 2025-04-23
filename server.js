@@ -12,7 +12,7 @@ mongoose.connect('mongodb+srv://dhanashreemore314:MlajhyMm5IfPwZWW@vellora-clust
 .then(() => {
     console.log("Connected to MongoDB");
 })
-.catch(err => console.log("Error connecting to MongoDB"))
+.catch(err => console.log("Error connecting to MongoDB:", err.message))
 
 //Use cors
 const cors = require('cors');

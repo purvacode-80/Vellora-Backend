@@ -40,5 +40,27 @@ const createContact = async (req, res) => {
     res.status(500).json({ message: 'Error creating contact', error: error.message });
   }
 };
+const updateContact = async (req, res) => {
+  try {
 
-module.exports = { getAllContacts, getContactById, createContact };
+      const _id = req.params._id;
+      const updatedData = req.body;
+      const updatedUser = await Contact.findByIdAndUpdate(_id, updatedData, {
+          new: true
+      });
+
+
+      if (!updatedUser) {
+          return res.status(404).send('No user found to update');
+      }
+
+      res.status(200).send({ message: "User updated successfully", updatedUser });
+  } catch (error) {
+      res.status(500).send(error.message);
+  }
+};
+
+  
+
+
+module.exports = { getAllContacts, getContactById, createContact ,updateContact};
