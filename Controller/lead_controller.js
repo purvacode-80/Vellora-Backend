@@ -41,4 +41,26 @@ const getLeadById = async (req, res) => {
   }
 }   
 
-module.exports = { getAllLeads, createLead, getLeadById };
+const updateLead = async (req, res) => {
+  try {
+
+      const _id = req.params._id;
+      const updatedData = req.body;
+      const updatedUser = await Lead.findByIdAndUpdate(_id, updatedData, {
+          new: true
+      });
+
+
+      if (!updatedUser) {
+          return res.status(404).send('No user found to update');
+      }
+
+      res.status(200).send({ message: "User updated successfully", updatedUser });
+  } catch (error) {
+      res.status(500).send(error.message);
+  }
+};
+
+
+
+module.exports = { getAllLeads, createLead, getLeadById,updateLead };
