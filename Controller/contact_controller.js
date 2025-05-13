@@ -72,4 +72,24 @@ const updateContact = async (req, res) => {
   }
 };
 
-module.exports = { getAllContacts, getContactById, createContact ,updateContact};
+const deleteContact = async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    const userEmail = req.user.email;
+
+    const contact = await Contact.findOneAndDelete({
+      _id: contactId,
+      createdBy: userEmail, // ✅ restrict to current user
+    });
+
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact not found or not authorized' });
+    }
+
+    res.status(200).json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting contact', error: error.message });
+  }
+};
+
+module.exports = { getAllContacts, getContactById, createContact ,updateContact, deleteContact};
