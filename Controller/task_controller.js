@@ -11,9 +11,11 @@ const getAllTasks = async (req, res) => {
 
 const addTask = async (req, res) => {
   try {
-    const newTask = new Task(req.body);
-    const savedTask = await newTask.save();
-    res.status(201).json(savedTask);
+    const { taskname, description, duedate, contact, status, assignedto, priority } = req.body;
+
+    const newtask = new Task({ taskname, description, duedate, contact, status, assignedto, priority });
+    await newtask.save();
+    res.status(201).json(newtask);
   } catch (err) {
     res.status(400).json({ message: 'Error adding task', error: err.message });
   }

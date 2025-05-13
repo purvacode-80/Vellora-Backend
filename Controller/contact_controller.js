@@ -2,10 +2,11 @@ const Contact = require('../Model/contact_model');
 
 const getAllContacts = async (req, res) => {
   try {
-    const contacts = await Contact.find();
+    const userEmail = req.user.email;
+    // console.log('Authenticated user:', req.user);
+    const contacts = await Contact.find({ createdBy: userEmail }); // ✅ show only user data
     res.status(200).json(contacts);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: 'Error retrieving contacts', error: error.message });
   }
 };
@@ -13,26 +14,34 @@ const getAllContacts = async (req, res) => {
 const getContactById = async (req, res) => {
   try {
     const { contactId } = req.params;
-    const contact = await Contact.findById(contactId);
+    const userEmail = req.user.email;
+
+    const contact = await Contact.findOne({
+      _id: contactId,
+      createdBy: userEmail, // ✅ restrict to current user
+    });
+
     if (!contact) {
-      return res.status(404).json({ message: 'Contact not found' });
+      return res.status(404).json({ message: 'Contact not found or not authorized' });
     }
+
     res.status(200).json(contact);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: 'Error retrieving contact', error: error.message });
-}
+  }
 };
 
 const createContact = async (req, res) => {
   try {
     const { name, email, phone, position, company, address, notes, status } = req.body;
+    // console.log('Authenticated user:', req.user);
     const contactExists = await Contact.findOne({ email })
       if(contactExists) {
           return res.status(400).json({ message : "User with this email already exists" })
     }
 
-    const newContact = new Contact({ name, email, phone, position, company, address, notes, status });
+    //Created by field is set to the email of the user who created the contact
+    const newContact = new Contact({ name, email, phone, position, company, address, notes, status, createdBy: req.user.email });
     await newContact.save();
     res.status(201).json(newContact);
   }
@@ -40,27 +49,27 @@ const createContact = async (req, res) => {
     res.status(500).json({ message: 'Error creating contact', error: error.message });
   }
 };
+
 const updateContact = async (req, res) => {
   try {
+    const _id = req.params._id;
+    const userEmail = req.user.email;
+    const updatedData = req.body;
 
-      const _id = req.params._id;
-      const updatedData = req.body;
-      const updatedUser = await Contact.findByIdAndUpdate(_id, updatedData, {
-          new: true
-      });
+    const contact = await Contact.findOneAndUpdate(
+      { _id, createdBy: userEmail }, // ✅ only if user owns it
+      updatedData,
+      { new: true }
+    );
 
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact not found or not authorized to update' });
+    }
 
-      if (!updatedUser) {
-          return res.status(404).send('No user found to update');
-      }
-
-      res.status(200).send({ message: "User updated successfully", updatedUser });
+    res.status(200).json({ message: 'Contact updated successfully', contact });
   } catch (error) {
-      res.status(500).send(error.message);
+    res.status(500).json({ message: 'Error updating contact', error: error.message });
   }
 };
-
-  
-
 
 module.exports = { getAllContacts, getContactById, createContact ,updateContact};

@@ -1,24 +1,40 @@
+const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = "Purva@2006"
 
-//Middleware to verify token
+const JWT_SECRET = "Purva@2006";
+const client = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID');
 
-const verifyToken = (req,res,next) => {
-    const token = req.headers['authorization'];
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).send('Access Denied. No token provided.');
+  }
 
-    if(!token) { 
-        return res.status(401).send('Access Denied. No token provided.');
-    }
+  const token = authHeader.replace("Bearer ", "");
 
-    //If token is provided check if it is valid
+  try {
+    // Try verifying with your secret (for local users)
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    return next();
+  } catch (err) {
+    // Not your token? Try Google verification
     try {
-        const decoded = jwt.verify(token.replace("Bearer ", ""),JWT_SECRET);
-        //Set user as authorized
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(400).json({message: "Invalid token"})
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: '779358812935-l8a5em7484oloj5rbieke33qk83cihke.apps.googleusercontent.com',
+      });
+      const payload = ticket.getPayload();
+
+      req.user = {
+        id: payload.sub,
+        email: payload.email
+      };
+      return next();
+    } catch (err2) {
+      return res.status(400).json({ message: "Invalid token" });
     }
-}
+  }
+};
 
 module.exports = verifyToken;
