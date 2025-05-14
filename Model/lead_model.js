@@ -1,24 +1,10 @@
 const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema({
-  companyName: {
-    type: String,
-    required: true,
-  },
-  contactPerson: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  phone: {
-    type: Number,
-    required: true,
-  },
+  companyName: { type: String, required: true },
+  contactPerson: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  phone: { type: Number, required: true },
   industry: String,
   leadSource: String,
   status: {
@@ -34,6 +20,10 @@ const leadSchema = new mongoose.Schema({
   lastContacted: Date,
   nextActionDate: Date,
   notes: String,
+  createdBy: {
+    type: String,
+    required: true
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Lead', leadSchema);

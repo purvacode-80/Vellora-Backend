@@ -24,17 +24,21 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Started','Not Started','Pending', 'In Progress', 'Completed'], 
+    enum: ['Started', 'Not Started', 'Pending', 'In Progress', 'Completed'],
     required: true
   },
   priority: {
     type: String,
-    enum: ['Low', 'Medium', 'High'], 
+    enum: ['Low', 'Medium', 'High'],
     required: true
   },
   assigneddate: {
     type: Date,
     default: Date.now
+  },
+  userEmail: {
+    type: String,
+    required: true  // 👈 Ensure this is always saved with the task
   }
 });
 
