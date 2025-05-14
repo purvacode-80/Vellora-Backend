@@ -6,15 +6,16 @@ const {
   updateLead
 } = require('../Controller/lead_controller');
 const validateLead = require('../Middleware/lead_validators');
-const authMiddleware = require('../Configuration/auth'); // 👈 Your authentication middleware
+const authMiddleware = require('../Configuration/auth');
+const verifyToken = require('../Configuration/auth');
 
 const router = express.Router();
 
-router.use(authMiddleware); // ✅ Apply to all lead routes
+// router.use(authMiddleware); // ✅ Apply to all lead routes
 
-router.get('/all', getAllLeads);
-router.get('/:leadId', getLeadById);
-router.post('/', validateLead, createLead);
-router.put('/editlead/:_id', updateLead);
+router.get('/all', verifyToken, getAllLeads);
+router.get('/:leadId',verifyToken, getLeadById);
+router.post('/',verifyToken, validateLead, createLead);
+router.put('/editlead/:_id',verifyToken, updateLead);
 
 module.exports = router;

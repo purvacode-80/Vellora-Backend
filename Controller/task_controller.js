@@ -1,4 +1,4 @@
-const Task = require('../Model/task_model');
+ const Task = require('../Model/task_model');
 
 const getAllTasks = async (req, res) => {
   try {
@@ -15,16 +15,7 @@ const addTask = async (req, res) => {
     const userEmail = req.user.email;
     const { taskname, description, duedate, contact, status, assignedto, priority } = req.body;
 
-    const newtask = new Task({
-      taskname,
-      description,
-      duedate,
-      contact,
-      status,
-      assignedto,
-      priority,
-      userEmail // ✅ associate with user
-    });
+    const newtask = new Task({ taskname, description, duedate, contact, status, assignedto, priority, userEmail});
 
     await newtask.save();
     res.status(201).json(newtask);
@@ -86,10 +77,4 @@ const deleteTask = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllTasks,
-  addTask,
-  updateTask,
-  deleteTask,
-  getTaskById
-};
+module.exports = { getAllTasks, addTask, updateTask, deleteTask, getTaskById };

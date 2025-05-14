@@ -34,7 +34,7 @@ const createLead = async (req, res) => {
 
     await newLead.save();
     res.status(201).json(newLead);
-        console.log("REQ.USER:", req.user);
+    // console.log("REQ.USER:", req.user);
 
   } catch (error) {
     res.status(500).json({ message: 'Error creating lead', error: error.message });
