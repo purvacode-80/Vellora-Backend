@@ -1,4 +1,5 @@
 const Contact = require('../Model/contact_model');
+const sendWelcomeEmail = require('../Utils/sendEmail');
 
 const getAllContacts = async (req, res) => {
   try {
@@ -34,18 +35,20 @@ const getContactById = async (req, res) => {
 const createContact = async (req, res) => {
   try {
     const { name, email, phone, position, company, address, notes, status } = req.body;
-    // console.log('Authenticated user:', req.user);
-    const contactExists = await Contact.findOne({ email })
-      if(contactExists) {
-          return res.status(400).json({ message : "User with this email already exists" })
+
+    const contactExists = await Contact.findOne({ email });
+    if (contactExists) {
+      return res.status(400).json({ message: "User with this email already exists" });
     }
 
-    //Created by field is set to the email of the user who created the contact
     const newContact = new Contact({ name, email, phone, position, company, address, notes, status, createdBy: req.user.email });
     await newContact.save();
+
+    // Send Welcome Email
+    await sendWelcomeEmail(email, name);
+
     res.status(201).json(newContact);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: 'Error creating contact', error: error.message });
   }
 };
