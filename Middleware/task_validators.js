@@ -21,13 +21,8 @@ const validateTask = [
     }),
 
   body('contact')
-    .notEmpty().withMessage('Contact number is required')
-    .isNumeric().withMessage('Contact must be a number')
-    .matches(/^[6-9]\d{9}$/).withMessage('Invalid Indian mobile number'),
-
-  body('assignedto')
-    .notEmpty().withMessage('Assigned person is required')
-    .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
+    .notEmpty().withMessage('Contact is required')
+    .isString().withMessage('Contact must be a string'),
 
   body('status')
     .notEmpty().withMessage('Status is required')

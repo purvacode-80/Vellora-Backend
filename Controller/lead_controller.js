@@ -78,4 +78,18 @@ const updateLead = async (req, res) => {
   }
 };
 
-module.exports = { getAllLeads, createLead, getLeadById, updateLead };
+const deleteLead = async (req, res) => {
+  try {
+    const { leadId } = req.params;
+    const deletedLead = await Lead.findOneAndDelete({ _id: leadId, createdBy: req.user.email });
+    if (!deletedLead) {
+      return res.status(404).json({ message: 'Lead not found or not authorized to delete' });
+    }
+    res.status(200).json({ message: 'Lead deleted successfully' });
+  }
+  catch (error) {
+    res.status(500).json({ message: 'Error deleting lead', error: error.message });
+  }
+}
+
+module.exports = { getAllLeads, createLead, getLeadById, updateLead, deleteLead };

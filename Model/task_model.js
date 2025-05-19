@@ -14,12 +14,11 @@ const taskSchema = new mongoose.Schema({
     required: true
   },
   contact: {
-    type: Number,
+    type: String,
     required: true
   },
   assignedto: {
     type: String,
-    required: true
   },
   status: {
     type: String,
