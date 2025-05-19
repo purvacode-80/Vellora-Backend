@@ -1,4 +1,5 @@
 const Lead = require('../Model/lead_model');
+const sendWelcomeEmail  = require('../Utils/sendEmail');
 
 const getAllLeads = async (req, res) => {
   try {
@@ -11,7 +12,20 @@ const getAllLeads = async (req, res) => {
 
 const createLead = async (req, res) => {
   try {
-    const { companyName, contactPerson, email, phone, industry, leadSource, status, priority, lastContacted, nextActionDate, notes } = req.body;
+    const {
+      companyName,
+      contactPerson,
+      email,
+      phone,
+      industry,
+      leadSource,
+      status,
+      priority,
+      lastContacted,
+      nextActionDate,
+      notes
+    } = req.body;
+
     const leadExists = await Lead.findOne({ email });
     if (leadExists) {
       return res.status(400).json({ message: "Lead with this email already exists" });
@@ -29,18 +43,24 @@ const createLead = async (req, res) => {
       lastContacted,
       nextActionDate,
       notes,
-      createdBy: req.user.email // 👈 Store who created it
+      createdBy: req.user.email
     });
 
     await newLead.save();
-    res.status(201).json(newLead);
-    // console.log("REQ.USER:", req.user);
 
+    // ✅ Catch email errors separately so lead creation still succeeds
+    try {
+      await sendWelcomeEmail(email, contactPerson || companyName);
+    } catch (emailError) {
+      console.error("❌ Failed to send email:", emailError.message);
+    }
+
+    res.status(201).json(newLead);
   } catch (error) {
     res.status(500).json({ message: 'Error creating lead', error: error.message });
-
   }
 };
+
 
 const getLeadById = async (req, res) => {
   try {
