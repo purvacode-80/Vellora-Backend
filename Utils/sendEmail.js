@@ -1,27 +1,26 @@
-const nodemailer = require('nodemailer');
+// utils/sendEmail.js
+const nodemailer = require("nodemailer");
 
-const sendWelcomeEmail = async (toEmail, name) => {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'purvaw06@gmail.com', // your Gmail
-        pass: 'watl gzku nerq ikeb', // your App Password
-      },
-    });
+const sendWelcomeEmail = async (recipientEmail, recipientName) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: 'purvaw06@gmail.com',
+      pass: 'watl gzku nerq ikeb',
+    },
+  });
 
-    const mailOptions = {
-      from: 'purvaw06@gmail.com',
-      to: toEmail,
-      subject: 'Welcome to Vellora CRM',
-      text: `Hi ${name},\n\nThank you for joining Vellora CRM. We’re happy to have you onboard!\n\nBest regards,\nVellora Team`,
-    };
+  const mailOptions = {
+    from: `"CRM Team" <${process.env.SMTP_EMAIL}>`,
+    to: recipientEmail,
+    subject: "Welcome to Our CRM System!",
+    html: `<p>Dear ${recipientName || "Lead"},</p>
+           <p>Thank you for joining our CRM. We'll be in touch with you soon!</p>
+           <p>Regards,<br/>CRM Team</p>`,
+  };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Welcome email sent to ${toEmail}`);
-  } catch (error) {
-    console.error(`❌ Failed to send email: ${error.message}`);
-  }
+  const info = await transporter.sendMail(mailOptions);
+  console.log("✅ Email sent:", info.response);
 };
 
 module.exports = sendWelcomeEmail;
