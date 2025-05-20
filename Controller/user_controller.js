@@ -58,4 +58,56 @@ const getUsers = async(req,res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, getUsers}
+const userExists = async (req,res) => {
+    try {
+        const { email } = req.body
+
+        // Check if User with given email exists
+        const userExists = await User.findOne({ email })
+        if(userExists) {
+            return res.status(200).json({exists : true})
+        }
+        return res.status(200).json({exists : false})
+    }
+    catch (err) {
+        res.status(500).json({ message : "Internal Server Error" , error : err.message })
+    }
+}
+
+const getProfileInfo = async (req,res) => {
+    try {
+        const userEmail = req.user.email;
+        const user = await User.findOne({ email : userEmail })
+        if(!user) {
+            return res.status(404).json({ message : "User not found" })
+        }
+        res.status(200).json({ fullName : user.fullName, email : user.email, phone_no : user.phone_no })
+    } catch (err) {
+        res.status(500).json({ message : "Internal Server Error" , error : err.message })
+    }
+}
+
+const updateUser = async (req,res) => {
+    try {
+        const userEmail = req.user.email;
+        const { fullName, phone_no } = req.body
+
+        // Check if User with given email exists
+        const user = await User.findOne({ email : userEmail })
+        if(!user) {
+            return res.status(404).json({ message : "User not found" })
+        }
+
+        // Update User
+        user.fullName = fullName
+        user.phone_no = phone_no
+        await user.save()
+        
+        res.status(200).json({ message : "User updated successfully" })
+    } catch (err) {
+        res.status(500).json({ message : "Internal Server Error" , error : err.message })
+    }
+}
+        
+
+module.exports = { registerUser, loginUser, getUsers, userExists, getProfileInfo, updateUser }
