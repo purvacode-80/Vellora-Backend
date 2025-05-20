@@ -1,6 +1,6 @@
-const user_controller = require('../Controller/user_controller')
-const authMiddleware = require('../Configuration/auth')
-const userValidators = require('../Middleware/user_validators')
+const user_controller = require('../Controller/user_controller');
+const authMiddleware = require('../Configuration/auth');
+const userValidators = require('../Middleware/user_validators');
 
 const express = require('express')
 const verifyToken = require('../Configuration/auth')
@@ -13,4 +13,4 @@ route.post('/userexists', user_controller.userExists)
 route.get('/profile', verifyToken, user_controller.getProfileInfo)
 route.put('/update', verifyToken, user_controller.updateUser)
 
-module.exports = route
+module.exports = route;
