@@ -34,18 +34,18 @@ const getContactById = async (req, res) => {
 
 const createContact = async (req, res) => {
   try {
-    const { name, email, phone, position, company, address, notes, status } = req.body;
+    const { fullName, email, phone, position, company, address, notes, status } = req.body;
 
     const contactExists = await Contact.findOne({ email });
     if (contactExists) {
       return res.status(400).json({ message: "User with this email already exists" });
     }
 
-    const newContact = new Contact({ name, email, phone, position, company, address, notes, status, createdBy: req.user.email });
+    const newContact = new Contact({ fullName, email, phone, position, company, address, notes, status, createdBy: req.user.email });
     await newContact.save();
 
     // Send Welcome Email
-    await sendWelcomeEmail(email, name);
+    await sendWelcomeEmail(email, fullName);
 
     res.status(201).json(newContact);
   } catch (error) {

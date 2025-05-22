@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 
 const validateLead = [
   body('companyName').notEmpty().withMessage('Company name is required'),
-  body('contactPerson').notEmpty().withMessage('Contact person is required'),
+  body('fullName').notEmpty().withMessage('Full Name is required'),
   body('email').notEmpty().withMessage('Email is required')
   .isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required')

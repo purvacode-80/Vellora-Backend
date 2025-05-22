@@ -14,7 +14,7 @@ const createLead = async (req, res) => {
   try {
     const {
       companyName,
-      contactPerson,
+      fullName,
       email,
       phone,
       industry,
@@ -26,14 +26,14 @@ const createLead = async (req, res) => {
       notes
     } = req.body;
 
-    const leadExists = await Lead.findOne({ email });
+    const leadExists = await Lead.findOne({ email : email , createdBy: req.user.email });
     if (leadExists) {
       return res.status(400).json({ message: "Lead with this email already exists" });
     }
 
     const newLead = new Lead({
       companyName,
-      contactPerson,
+      fullName,
       email,
       phone,
       industry,
@@ -50,7 +50,7 @@ const createLead = async (req, res) => {
 
     // ✅ Catch email errors separately so lead creation still succeeds
     try {
-      await sendWelcomeEmail(email, contactPerson || companyName);
+      await sendWelcomeEmail(email, fullName || companyName);
     } catch (emailError) {
       console.error("❌ Failed to send email:", emailError.message);
     }

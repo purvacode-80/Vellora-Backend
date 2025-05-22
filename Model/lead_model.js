@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema({
   companyName: { type: String, required: true },
-  contactPerson: { type: String, required: true },
+  fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   phone: { type: Number, required: true },
   industry: String,
