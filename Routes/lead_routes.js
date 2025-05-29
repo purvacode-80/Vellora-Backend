@@ -4,7 +4,8 @@ const {
   getLeadById,
   createLead,
   updateLead,
-  deleteLead
+  deleteLead,
+  convertLead
 } = require('../Controller/lead_controller');
 const validateLead = require('../Middleware/lead_validators');
 const authMiddleware = require('../Configuration/auth');
@@ -19,5 +20,6 @@ router.get('/:leadId',verifyToken, getLeadById);
 router.post('/',verifyToken, validateLead, createLead);
 router.put('/editlead/:_id',verifyToken, updateLead);
 router.delete('/deletelead/:leadId',verifyToken, deleteLead);
+router.get('/convert-lead/:leadId', verifyToken, convertLead);
 
 module.exports = router;

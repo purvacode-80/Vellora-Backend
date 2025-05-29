@@ -39,6 +39,9 @@ app.use('/task', task_route)
 const event_route = require('./Routes/event_routes')
 app.use('/event', event_route)
 
+const analytics_route = require('./Analytics/analytics_routes')
+app.use('/analytics', analytics_route)
+
 const port = 8000
 app.listen(port, ()=> {
     console.log(`Server running on port ${port}`);

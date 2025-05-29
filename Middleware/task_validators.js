@@ -26,7 +26,7 @@ const validateTask = [
 
   body('status')
     .notEmpty().withMessage('Status is required')
-    .isIn(['Started', 'Not Started', 'Pending', 'In Progress', 'Completed'])
+    .isIn(['Not Started', 'Deferred', 'In Progress', 'Completed'])
     .withMessage('Invalid status value'),
 
   body('priority')

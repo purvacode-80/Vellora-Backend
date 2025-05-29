@@ -5,7 +5,11 @@ const leadSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   phone: { type: Number, required: true },
-  industry: String,
+  industry: {
+    type: String,
+    enum: ['Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing', 'Education', 'Real Estate'],
+    default: 'Technology'
+  },
   leadSource: {
     type: String,
     enum: ['Referral', 'Website', 'Cold Call', 'Social Media', 'Email Campaign', 'Trade Show', 'Other'],

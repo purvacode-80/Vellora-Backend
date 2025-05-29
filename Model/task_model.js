@@ -22,7 +22,7 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Started', 'Not Started', 'Pending', 'In Progress', 'Completed'],
+    enum: ['Not Started', 'Deferred', 'In Progress', 'Completed'],
     required: true
   },
   priority: {
@@ -34,9 +34,9 @@ const taskSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  userEmail: {
+  createdBy: {
     type: String,
-    required: true  // 👈 Ensure this is always saved with the task
+    required: true
   }
 });
 

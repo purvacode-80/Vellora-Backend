@@ -45,7 +45,7 @@ const createContact = async (req, res) => {
     await newContact.save();
 
     // Send Welcome Email
-    await sendWelcomeEmail(email, fullName);
+    // await sendWelcomeEmail(email, fullName);
 
     res.status(201).json(newContact);
   } catch (error) {

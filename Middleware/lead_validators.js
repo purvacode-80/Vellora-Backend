@@ -8,7 +8,7 @@ const validateLead = [
   body('phone').notEmpty().withMessage('Phone number is required')
   .matches(/^\d{10}$/).withMessage('Phone number must be 10 digits'),
   body('leadSource').optional().isIn(['Referral', 'Website', 'Cold Call', 'Social Media', 'Email Campaign', 'Trade Show', 'Other']).withMessage('Invalid lead source'),
-  body('industry').optional().isString().withMessage('Industry must be a string'),
+  body('industry').optional().isIn(['Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing', 'Education', 'Real Estate']),
   body('status').optional().isIn(['New', 'In Progress', 'Converted', 'Closed']).withMessage('Invalid status'),
   body('priority').optional().isIn(['Low', 'Medium', 'High']).withMessage('Invalid priority'),
 

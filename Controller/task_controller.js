@@ -3,7 +3,7 @@
 const getAllTasks = async (req, res) => {
   try {
     const userEmail = req.user.email;
-    const tasks = await Task.find({ userEmail }); // 🔍 Filter by user
+    const tasks = await Task.find({ createdBy : userEmail }); // 🔍 Filter by user
     res.status(200).json(tasks);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching tasks', error: err.message });
@@ -15,7 +15,7 @@ const addTask = async (req, res) => {
     const userEmail = req.user.email;
     const { taskname, description, duedate, contact, status, assignedto, priority } = req.body;
 
-    const newtask = new Task({ taskname, description, duedate, contact, status, assignedto, priority, userEmail});
+    const newtask = new Task({ taskname, description, duedate, contact, status, assignedto, priority, createdBy: userEmail});
 
     await newtask.save();
     res.status(201).json(newtask);
@@ -30,7 +30,7 @@ const updateTask = async (req, res) => {
     const taskId = req.params.id;
 
     const task = await Task.findOneAndUpdate(
-      { _id: taskId, userEmail }, // ✅ match by ID & user
+      { _id: taskId, createdBy : userEmail }, // ✅ match by ID & user
       req.body,
       { new: true, runValidators: true }
     );
@@ -49,7 +49,7 @@ const getTaskById = async (req, res) => {
   try {
     const userEmail = req.user.email;
     const taskId = req.params.id;
-    const task = await Task.findOne({ _id: taskId, userEmail }); // ✅ secure fetch
+    const task = await Task.findOne({ _id: taskId, createdBy : userEmail }); // ✅ secure fetch
 
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
@@ -65,7 +65,7 @@ const deleteTask = async (req, res) => {
   try {
     const userEmail = req.user.email;
     const taskId = req.params.id;
-    const deletedTask = await Task.findOneAndDelete({ _id: taskId, userEmail });
+    const deletedTask = await Task.findOneAndDelete({ _id: taskId, createdBy : userEmail });
 
     if (!deletedTask) {
       return res.status(404).json({ message: 'Task not found' });

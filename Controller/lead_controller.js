@@ -3,7 +3,7 @@ const sendWelcomeEmail  = require('../Utils/sendEmail');
 
 const getAllLeads = async (req, res) => {
   try {
-    const leads = await Lead.find({ createdBy: req.user.email });
+    const leads = await Lead.find({ createdBy: req.user.email, status: { $ne: 'Converted' } }).sort({ createdAt: -1 });
     res.status(200).json(leads);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving leads', error: error.message });
@@ -49,11 +49,11 @@ const createLead = async (req, res) => {
     await newLead.save();
 
     // ✅ Catch email errors separately so lead creation still succeeds
-    try {
-      await sendWelcomeEmail(email, fullName || companyName);
-    } catch (emailError) {
-      console.error("❌ Failed to send email:", emailError.message);
-    }
+    // try {
+    //   await sendWelcomeEmail(email, fullName || companyName);
+    // } catch (emailError) {
+    //   console.error("❌ Failed to send email:", emailError.message);
+    // }
 
     res.status(201).json(newLead);
   } catch (error) {
@@ -112,4 +112,22 @@ const deleteLead = async (req, res) => {
   }
 }
 
-module.exports = { getAllLeads, createLead, getLeadById, updateLead, deleteLead };
+const convertLead = async (req, res) => {
+  try {
+    const { leadId } = req.params;
+    const lead = await Lead.findOne({ _id: leadId, createdBy: req.user.email });
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead not found or not authorized to convert' });
+    }
+    if (lead.status === 'Converted') {
+      return res.status(400).json({ message: 'Lead is already converted' });
+    }
+    lead.status = 'Converted';
+    const convertedLead = await lead.save();
+    res.status(200).json({ message: 'Lead converted successfully', convertedLead });
+  } catch (error) {
+    res.status(500).json({ message: 'Error converting lead', error: error.message });
+  }
+};
+
+module.exports = { getAllLeads, createLead, getLeadById, updateLead, deleteLead, convertLead };
