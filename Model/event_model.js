@@ -9,6 +9,14 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  notify: { 
+    type: Boolean, 
+    default: false 
+  },
+  reminderTime: { 
+    type: Number, 
+    default: 5 // minutes
+  }
 },
   { timestamps: true }
 );

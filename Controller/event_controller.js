@@ -12,7 +12,7 @@ const getEvents = async (req, res) => {
 
 // Create a new event for the user
 const addEvent = async (req, res) => {
-  const { title, start, end, description } = req.body;
+  const { title, start, end, description, notify, reminderTime } = req.body;
 
   try {
     const newEvent = new Event({
@@ -21,6 +21,8 @@ const addEvent = async (req, res) => {
       end,
       description,
       createdBy: req.user.email,
+      notify: notify || false, // Default to false if not provided
+      reminderTime: reminderTime || 5, // Default to 5 minutes if not provided
     });
 
     await newEvent.save();
@@ -34,9 +36,21 @@ const addEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
+    
+    // Extract all possible fields including notification settings
+    const updateData = {};
+    const allowedFields = ['title', 'start', 'end', 'description', 'notify', 'reminderTime'];
+    
+    // Only include fields that are present in the request body
+    allowedFields.forEach(field => {
+      if (req.body.hasOwnProperty(field)) {
+        updateData[field] = req.body[field];
+      }
+    });
+
     const updatedEvent = await Event.findOneAndUpdate(
       { _id: eventId, createdBy: req.user.email },
-      req.body,
+      updateData,
       { new: true }
     );
 
