@@ -44,9 +44,9 @@ const getAllContacts = async (req, res) => {
 // Get comprehensive analytics
 const advanced = async (req, res) => {
   try {
-    const { days = 30 } = req.query;
+    // Calculate the start date for exactly 8 weeks ago
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - parseInt(days));
+    startDate.setDate(startDate.getDate() - (8 * 7)); // 8 weeks = 56 days
 
     // Get analytics data for leads
     const analyticsData = await Lead.aggregate([
@@ -55,10 +55,13 @@ const advanced = async (req, res) => {
       },
       {
         $facet: {
-          // Weekly trends for leads
+          // Weekly trends for leads - last 8 weeks
           weeklyLeadTrends: [
             {
-              $match: { createdAt: { $gte: startDate }, createdBy: req.user.email }
+              $match: { 
+                createdAt: { $gte: startDate }, 
+                createdBy: req.user.email 
+              }
             },
             {
               $group: {
@@ -87,6 +90,11 @@ const advanced = async (req, res) => {
           // Lead source analysis
           sourceAnalysis: [
             {
+              $match: { 
+                createdAt: { $gte: startDate }
+              }
+            },
+            {
               $group: {
                 _id: "$leadSource",
                 count: { $sum: 1 },
@@ -103,6 +111,11 @@ const advanced = async (req, res) => {
           // Status distribution
           statusDistribution: [
             {
+              $match: { 
+                createdAt: { $gte: startDate }
+              }
+            },
+            {
               $group: {
                 _id: "$status",
                 count: { $sum: 1 }
@@ -113,7 +126,10 @@ const advanced = async (req, res) => {
           // Industry performance
           industryPerformance: [
             {
-              $match: { industry: { $exists: true, $ne: null, $ne: "" } }
+              $match: { 
+                createdAt: { $gte: startDate },
+                industry: { $exists: true, $ne: null, $ne: "" } 
+              }
             },
             {
               $group: {
@@ -140,6 +156,11 @@ const advanced = async (req, res) => {
           // User performance
           userPerformance: [
             {
+              $match: { 
+                createdAt: { $gte: startDate }
+              }
+            },
+            {
               $group: {
                 _id: "$createdBy",
                 leadsCreated: { $sum: 1 },
@@ -162,14 +183,17 @@ const advanced = async (req, res) => {
       }
     ]);
 
-    // Get contacts data (assuming you have a Contact model)
+    // Get contacts data for the last 8 weeks
     const contactsData = await Contact.aggregate([
       {
         $facet: {
-          // Weekly trends for contacts
+          // Weekly trends for contacts - last 8 weeks
           weeklyContactTrends: [
             {
-              $match: { createdAt: { $gte: startDate }, createdBy: req.user.email }
+              $match: { 
+                createdAt: { $gte: startDate }, 
+                createdBy: req.user.email 
+              }
             },
             {
               $group: {
@@ -186,6 +210,12 @@ const advanced = async (req, res) => {
           // Contact source analysis
           contactSourceAnalysis: [
             {
+              $match: { 
+                createdAt: { $gte: startDate },
+                createdBy: req.user.email 
+              }
+            },
+            {
               $group: {
                 _id: "$contactSource",
                 count: { $sum: 1 }
@@ -196,6 +226,27 @@ const advanced = async (req, res) => {
       }
     ]);
 
+    // Create a complete set of the last 8 weeks
+    const weeklyTrendsComplete = [];
+    const currentDate = new Date();
+    
+    for (let i = 7; i >= 0; i--) {
+      const weekDate = new Date(currentDate);
+      weekDate.setDate(currentDate.getDate() - (i * 7));
+      
+      const year = weekDate.getFullYear();
+      const week = getWeekNumber(weekDate);
+      
+      weeklyTrendsComplete.push({
+        name: `Week ${week}, ${year}`,
+        year: year,
+        week: week,
+        leads: 0,
+        converted: 0,
+        contacts: 0
+      });
+    }
+
     // Merge weekly trends data (leads and contacts)
     const leadTrends = analyticsData[0].weeklyLeadTrends;
     const contactTrends = contactsData[0].weeklyContactTrends;
@@ -203,33 +254,28 @@ const advanced = async (req, res) => {
     // Create a map for easier merging
     const trendsMap = new Map();
 
+    // Initialize with complete weeks (all zeros)
+    weeklyTrendsComplete.forEach(week => {
+      const key = `${week.year}-${week.week}`;
+      trendsMap.set(key, week);
+    });
+
     // Add lead data
     leadTrends.forEach(item => {
       const key = `${item._id.year}-${item._id.week}`;
-      trendsMap.set(key, {
-        name: `Week ${item._id.week}, ${item._id.year}`,
-        year: item._id.year,
-        week: item._id.week,
-        leads: item.leads,
-        converted: item.converted,
-        contacts: 0 // Initialize contacts to 0
-      });
+      if (trendsMap.has(key)) {
+        const existing = trendsMap.get(key);
+        existing.leads = item.leads;
+        existing.converted = item.converted;
+      }
     });
 
     // Add contact data
     contactTrends.forEach(item => {
       const key = `${item._id.year}-${item._id.week}`;
       if (trendsMap.has(key)) {
-        trendsMap.get(key).contacts = item.contacts;
-      } else {
-        trendsMap.set(key, {
-          name: `Week ${item._id.week}, ${item._id.year}`,
-          year: item._id.year,
-          week: item._id.week,
-          leads: 0,
-          converted: 0,
-          contacts: item.contacts
-        });
+        const existing = trendsMap.get(key);
+        existing.contacts = item.contacts;
       }
     });
 
@@ -246,7 +292,7 @@ const advanced = async (req, res) => {
       contactSourceAnalysis: contactsData[0].contactSourceAnalysis
     };
 
-    // Remove the old monthly trends since we're now using weekly
+    // Remove the old weekly lead trends since we're now using combined weeklyTrends
     delete combinedAnalytics.weeklyLeadTrends;
 
     res.json(combinedAnalytics);
@@ -254,6 +300,15 @@ const advanced = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Helper function to get week number
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
 
 // Get dashboard summary
 const summary = async (req, res) => {
