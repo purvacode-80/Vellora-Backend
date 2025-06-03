@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 console.log("Welcome to Express")
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // Connect to MongoDB
 
@@ -41,6 +42,9 @@ app.use('/event', event_route)
 
 const analytics_route = require('./Analytics/analytics_routes')
 app.use('/analytics', analytics_route)
+
+const gemini_route = require('./Gemini/email_routes')
+app.use('/gemini', gemini_route)
 
 const port = 8000
 app.listen(port, ()=> {
