@@ -1,11 +1,10 @@
 const Contact = require('../Model/contact_model');
-const sendWelcomeEmail = require('../Utils/sendEmail');
 
 const getAllContacts = async (req, res) => {
   try {
     const userEmail = req.user.email;
     // console.log('Authenticated user:', req.user);
-    const contacts = await Contact.find({ createdBy: userEmail }); // ✅ show only user data
+    const contacts = await Contact.find({ createdBy: userEmail }).sort({ createdAt: -1 }); // ✅ show only user data
     res.status(200).json(contacts);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving contacts', error: error.message });
@@ -44,23 +43,39 @@ const createContact = async (req, res) => {
     const newContact = new Contact({ fullName, email, phone, position, company, address, notes, status, createdBy: req.user.email });
     await newContact.save();
 
-    // Send Welcome Email
-    // await sendWelcomeEmail(email, fullName);
-
     res.status(201).json(newContact);
   } catch (error) {
     res.status(500).json({ message: 'Error creating contact', error: error.message });
   }
 };
 
+const AddConvertedContact = async (req, res) => {
+  const userEmail = req.user.email;
+  try {
+    const { fullName, email, phone, company } = req.body;
+
+    const contactExists = await Contact.findOne({ email, createdBy: userEmail });
+    if (contactExists) {
+      return res.status(400).json({ message: "User with this email already exists" });
+    }
+
+    const newContact = new Contact({ fullName, email, phone, company, createdBy: userEmail });
+    await newContact.save();
+
+    res.status(201).json(newContact);
+  } catch (error) {
+    res.status(500).json({ message: 'Error converting to contact', error: error.message });
+  }
+};
+
 const updateContact = async (req, res) => {
   try {
-    const _id = req.params._id;
+    const contactId = req.params;
     const userEmail = req.user.email;
     const updatedData = req.body;
 
     const contact = await Contact.findOneAndUpdate(
-      { _id, createdBy: userEmail }, // ✅ only if user owns it
+      { _id: contactId, createdBy: userEmail }, // ✅ only if user owns it
       updatedData,
       { new: true }
     );
@@ -95,4 +110,4 @@ const deleteContact = async (req, res) => {
   }
 };
 
-module.exports = { getAllContacts, getContactById, createContact ,updateContact, deleteContact};
+module.exports = { getAllContacts, getContactById, createContact ,updateContact, deleteContact, AddConvertedContact };

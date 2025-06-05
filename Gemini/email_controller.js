@@ -44,32 +44,57 @@ const sendEmail = async (req, res) => {
       return res.status(400).json({ message: 'To, subject, and body are required' });
     }
 
-    // Integrate with nodemailer
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Use your email service
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // Your email address
-        pass: process.env.EMAIL_PASS, // Your email password or app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to,
       subject,
       text: body,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("❌ Error sending email:", error.message);
-        return res.status(500).json({ message: 'Failed to send email', error: error.message });
-      }
-      return res.status(200).json({ message: 'Email sent successfully', info });
-    });
+    if (Array.isArray(to)) {
+      // bulk email
+      const emailPromises = to.map(email => {
+        return new Promise((resolve, reject) => {
+          transporter.sendMail({ ...mailOptions, to: email }, (error, info) => {
+            if (error) {
+              console.error("❌ Error sending to:", email, "-", error.message);
+              return reject({ email, error: error.message });
+            }
+            resolve({ email, info });
+          });
+        });
+      });
+
+      const results = await Promise.allSettled(emailPromises);
+      const success = results.filter(r => r.status === 'fulfilled');
+      const failure = results.filter(r => r.status === 'rejected');
+
+      return res.status(200).json({
+        message: 'Bulk email processed',
+        success: success.length,
+        failed: failure.length,
+        details: { success, failure },
+      });
+    } else {
+      // single email
+      transporter.sendMail({ ...mailOptions, to }, (error, info) => {
+        if (error) {
+          console.error("❌ Error sending email:", error.message);
+          return res.status(500).json({ message: 'Failed to send email', error: error.message });
+        }
+        return res.status(200).json({ message: 'Email sent successfully', info });
+      });
+    }
   } catch (error) {
-    console.error("❌ Error sending email:", error.message);
-    return res.status(500).json({ message: 'Failed to send email', error: error.message });
+    console.error("❌ Error in handleSendEmail:", error.message);
+    return res.status(500).json({ message: 'Email sending failed', error: error.message });
   }
 };
 

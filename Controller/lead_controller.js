@@ -1,5 +1,4 @@
 const Lead = require('../Model/lead_model');
-const sendWelcomeEmail  = require('../Utils/sendEmail');
 
 const getAllLeads = async (req, res) => {
   try {
@@ -47,13 +46,6 @@ const createLead = async (req, res) => {
     });
 
     await newLead.save();
-
-    // ✅ Catch email errors separately so lead creation still succeeds
-    // try {
-    //   await sendWelcomeEmail(email, fullName || companyName);
-    // } catch (emailError) {
-    //   console.error("❌ Failed to send email:", emailError.message);
-    // }
 
     res.status(201).json(newLead);
   } catch (error) {

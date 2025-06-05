@@ -4,7 +4,8 @@ const {
   getContactById,
   createContact,
   updateContact,
-  deleteContact
+  deleteContact,
+  AddConvertedContact
 } = require('../Controller/contact_controller');
 const validateContact = require('../Middleware/contact_validators');
 const verifyToken = require('../Configuration/auth'); // ✅ your auth middleware
@@ -15,7 +16,8 @@ const router = express.Router();
 router.get('/all', verifyToken, getAllContacts);
 router.get('/:contactId', verifyToken, getContactById);
 router.post('/', verifyToken, validateContact, createContact);
-router.put('/editcontact/:_id', verifyToken, updateContact);
-router.delete('/delete-contact/:_id', verifyToken, deleteContact);
+router.put('/editcontact/:contactId', verifyToken, updateContact);
+router.delete('/delete-contact/:contactId', verifyToken, deleteContact);
+router.post('/add-converted-contact', verifyToken, validateContact, AddConvertedContact);
 
 module.exports = router;
