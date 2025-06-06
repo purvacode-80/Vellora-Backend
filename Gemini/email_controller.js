@@ -1,5 +1,6 @@
 const axios = require('axios');
 const nodemailer = require('nodemailer');
+const { logSentEmails } = require('../Controller/emailLog_controller'); // Import the logging function
 
 const generateEmail = async (req, res) => {
   try {
@@ -73,6 +74,9 @@ const sendEmail = async (req, res) => {
       });
 
       const results = await Promise.allSettled(emailPromises);
+
+      await logSentEmails({ to, subject, body, sentBy: req.user.email });
+
       const success = results.filter(r => r.status === 'fulfilled');
       const failure = results.filter(r => r.status === 'rejected');
 
@@ -84,13 +88,9 @@ const sendEmail = async (req, res) => {
       });
     } else {
       // single email
-      transporter.sendMail({ ...mailOptions, to }, (error, info) => {
-        if (error) {
-          console.error("❌ Error sending email:", error.message);
-          return res.status(500).json({ message: 'Failed to send email', error: error.message });
-        }
-        return res.status(200).json({ message: 'Email sent successfully', info });
-      });
+      const info = await transporter.sendMail({ ...mailOptions, to });
+      await logSentEmails({ to, subject, body, sentBy: req.user.email });
+      return res.status(200).json({ message: 'Email sent successfully', info });
     }
   } catch (error) {
     console.error("❌ Error in handleSendEmail:", error.message);

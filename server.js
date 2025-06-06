@@ -43,8 +43,17 @@ app.use('/event', event_route)
 const analytics_route = require('./Analytics/analytics_routes')
 app.use('/analytics', analytics_route)
 
+// Generating email responses using Gemini and sending emails
 const gemini_route = require('./Gemini/email_routes')
 app.use('/gemini', gemini_route)
+
+//Saving email logs
+const emailLog_route = require('./Routes/email_routes')
+app.use('/email', emailLog_route)
+
+// Chatbot routes
+const chat_route = require('./Gemini/chat_routes')
+app.use('/chat', chat_route)
 
 const port = 8000
 app.listen(port, ()=> {
