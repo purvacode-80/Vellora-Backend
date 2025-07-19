@@ -10,9 +10,7 @@ This is the **backend** of Vellora CRM – a full-featured CRM system powered by
 - 🛢 MongoDB + Mongoose
 - 🔐 JWT Authentication
 - 📧 Nodemailer (emailing)
-- 📊 Predictive Analytics (Python microservice)
-- 🗓 Task, Event & Meeting APIs
-- 🧠 AI Chatbot Integration
+- 🧠 AI Chatbot Integration using Gemini API
 
 ---
 
@@ -20,8 +18,8 @@ This is the **backend** of Vellora CRM – a full-featured CRM system powered by
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/vellora-backend.git
-cd vellora-backend
+git clone https://github.com/purvacode-80/Vellora-Backend.git
+cd Vellora-Backend
 
 # 2. Install dependencies
 npm install
